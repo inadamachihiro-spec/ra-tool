@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RA企業管理ツール</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f5f5f0;color:#1a1a1a;font-size:14px;}
+.app{display:flex;height:100vh;}
+.sidebar{width:200px;flex-shrink:0;border-right:1px solid #e5e5e0;padding:16px 0;background:#fafaf8;display:flex;flex-direction:column;}
+.sidebar-logo{font-size:13px;font-weight:500;padding:0 16px 16px;border-bottom:1px solid #e5e5e0;margin-bottom:12px;display:flex;align-items:center;gap:6px;}
+.nav-item{display:flex;align-items:center;gap:8px;padding:7px 16px;cursor:pointer;color:#666;font-size:13px;border-left:2px solid transparent;transition:background 0.1s;}
+.nav-item:hover{background:#f0f0ea;color:#1a1a1a;}
+.nav-item.active{color:#1a1a1a;border-left-color:#534AB7;background:#fff;font-weight:500;}
+.nav-item i{font-size:16px;}
+.badge-count{background:#E24B4A;color:#fff;border-radius:20px;font-size:10px;padding:1px 6px;margin-left:auto;}
+.main{flex:1;overflow:hidden;display:flex;flex-direction:column;min-width:0;}
+.topbar{padding:10px 16px;border-bottom:1px solid #e5e5e0;display:flex;align-items:center;gap:10px;background:#fff;}
+.topbar h1{font-size:14px;font-weight:500;flex:1;}
+.btn{padding:5px 12px;border-radius:8px;border:1px solid #ddd;background:transparent;font-size:12px;cursor:pointer;color:#1a1a1a;display:inline-flex;align-items:center;gap:5px;transition:background 0.1s;}
+.btn:hover{background:#f5f5f0;}
+.btn.primary{background:#534AB7;color:#fff;border-color:#534AB7;}
+.btn.primary:hover{background:#3C3489;}
+.content{flex:1;overflow-y:auto;padding:16px;}
+.company-list{display:flex;flex-direction:column;gap:7px;}
+.company-card{background:#fff;border:1px solid #e5e5e0;border-radius:12px;padding:12px 14px;cursor:pointer;transition:border-color 0.15s;}
+.company-card:hover{border-color:#bbb;}
+.company-card.selected{border-color:#534AB7;}
+.company-top{display:flex;align-items:center;gap:10px;}
+.company-icon{width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:500;font-size:12px;flex-shrink:0;background:#EEEDFE;color:#3C3489;}
+.company-name{font-size:13px;font-weight:500;}
+.company-meta{font-size:11px;color:#999;margin-top:1px;}
+.status-badge{font-size:10px;padding:2px 7px;border-radius:20px;margin-left:auto;flex-shrink:0;}
+.s-active{background:#EAF3DE;color:#3B6D11;}
+.s-prospect{background:#EEEDFE;color:#3C3489;}
+.s-hold{background:#FAEEDA;color:#633806;}
+.company-bottom{display:flex;align-items:center;gap:12px;margin-top:8px;padding-top:8px;border-top:1px solid #f0f0ea;}
+.meta-chip{display:flex;align-items:center;gap:4px;font-size:11px;color:#999;}
+.alert-dot-red{width:6px;height:6px;border-radius:50%;background:#E24B4A;margin-left:auto;flex-shrink:0;}
+.detail{width:380px;flex-shrink:0;border-left:1px solid #e5e5e0;overflow-y:auto;background:#fff;}
+.detail-header{padding:14px 16px;border-bottom:1px solid #e5e5e0;}
+.detail-name{font-size:15px;font-weight:500;}
+.detail-sub{font-size:11px;color:#999;margin-top:2px;}
+.detail-actions{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap;}
+.tab-bar{display:flex;border-bottom:1px solid #e5e5e0;padding:0 16px;overflow-x:auto;}
+.tab{padding:9px 0;margin-right:14px;font-size:12px;cursor:pointer;color:#999;border-bottom:2px solid transparent;white-space:nowrap;flex-shrink:0;}
+.tab.active{color:#1a1a1a;border-bottom-color:#534AB7;font-weight:500;}
+.detail-content{padding:14px 16px;}
+.field-label{font-size:10px;color:#999;margin-bottom:4px;letter-spacing:0.04em;text-transform:uppercase;}
+.field-value{font-size:13px;margin-bottom:14px;line-height:1.6;}
+.divider{border:none;border-top:1px solid #f0f0ea;margin:14px 0;}
+.next-action-box{background:#EEEDFE;border-radius:8px;padding:10px 12px;display:flex;gap:8px;margin-bottom:14px;}
+.next-action-box i{color:#534AB7;font-size:15px;margin-top:1px;flex-shrink:0;}
+.next-action-text{font-size:12px;color:#3C3489;line-height:1.5;}
+.kw-tag{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:20px;background:#f5f5f0;border:1px solid #e5e5e0;font-size:11px;margin:2px;}
+.kw-tag i{font-size:11px;color:#999;cursor:pointer;}
+.section-block{margin-bottom:18px;}
+.section-block-title{font-size:11px;font-weight:500;color:#555;margin-bottom:8px;display:flex;align-items:center;gap:6px;}
+.section-block-title i{font-size:14px;}
+.doc-row{display:flex;align-items:center;gap:8px;padding:8px 10px;background:#fafaf8;border-radius:8px;margin-bottom:6px;}
+.doc-name{font-size:12px;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.doc-actions{display:flex;gap:4px;flex-shrink:0;}
+.icon-btn{padding:4px;border-radius:6px;border:none;background:transparent;cursor:pointer;color:#999;display:flex;align-items:center;font-size:14px;}
+.icon-btn:hover{background:#f0f0ea;color:#1a1a1a;}
+.notion-row{display:flex;align-items:center;gap:8px;padding:8px 10px;background:#fafaf8;border-radius:8px;margin-bottom:6px;}
+.notion-title{font-size:12px;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.notion-url{font-size:10px;color:#999;font-family:monospace;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.refund-box{background:#fafaf8;border-radius:8px;padding:12px;}
+.refund-row{display:flex;gap:10px;padding:6px 0;border-bottom:1px solid #f0f0ea;align-items:flex-start;}
+.refund-row:last-child{border-bottom:none;}
+.refund-label{font-size:11px;color:#999;width:80px;flex-shrink:0;padding-top:1px;}
+.refund-value{font-size:12px;flex:1;line-height:1.5;}
+.check-item{display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-bottom:1px solid #f0f0ea;}
+.check-item:last-child{border-bottom:none;}
+.check-box{width:18px;height:18px;border-radius:4px;border:1.5px solid #ccc;flex-shrink:0;cursor:pointer;display:flex;align-items:center;justify-content:center;margin-top:1px;background:#fff;}
+.check-box.checked{background:#534AB7;border-color:#534AB7;}
+.check-box.checked i{color:#fff;font-size:12px;}
+.check-label{font-size:12px;flex:1;line-height:1.5;}
+.check-label.done{color:#aaa;text-decoration:line-through;}
+.check-note{font-size:11px;color:#aaa;margin-top:2px;}
+.check-priority{font-size:10px;padding:1px 6px;border-radius:20px;flex-shrink:0;margin-top:2px;}
+.p-high{background:#FCEBEB;color:#A32D2D;}
+.p-med{background:#FAEEDA;color:#633806;}
+.p-low{background:#F5F5F0;color:#666;}
+.memo-area{width:100%;border:1px solid #ddd;border-radius:8px;padding:8px 10px;font-size:12px;font-family:inherit;resize:vertical;min-height:80px;margin-top:8px;background:#fff;}
+.memo-area:focus{outline:none;border-color:#534AB7;}
+.add-row{display:flex;gap:6px;margin-top:8px;}
+.add-row input{flex:1;padding:6px 10px;border:1px solid #ddd;border-radius:8px;font-size:12px;background:#fff;}
+.add-row input:focus{outline:none;border-color:#534AB7;}
+.add-row select{padding:5px 8px;border:1px solid #ddd;border-radius:8px;font-size:12px;background:#fff;}
+.mail-alert-card{background:#fafaf8;border-radius:8px;padding:10px 12px;margin-bottom:8px;border-left:3px solid #534AB7;}
+.alert-tag{font-size:10px;padding:2px 7px;border-radius:20px;font-weight:500;}
+.tag-change{background:#FAECE7;color:#4A1B0C;}
+.tag-close{background:#FAEEDA;color:#412402;}
+.tag-urgent{background:#FCEBEB;color:#501313;}
+.empty-detail{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:#aaa;font-size:13px;gap:10px;}
+.progress-bar{height:5px;background:#f0f0ea;border-radius:4px;overflow:hidden;flex:1;}
+.progress-fill{height:100%;background:#534AB7;border-radius:4px;transition:width 0.3s;}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="sidebar">
+    <div class="sidebar-logo"><i class="ti ti-building"></i>RA管理ツール</div>
+    <div class="nav-item active" id="nav-co"><i class="ti ti-building"></i>企業一覧</div>
+    <div class="nav-item" id="nav-al" onclick="showAlerts()"><i class="ti ti-bell"></i>メールアラート<span class="badge-count" id="alert-count">0</span></div>
+    <div style="flex:1;"></div>
+    <div style="padding:12px 16px;font-size:11px;color:#aaa;border-top:1px solid #e5e5e0;">ver 1.0 · RA管理ツール</div>
+  </div>
+  <div class="main">
+    <div class="topbar">
+      <h1 id="view-title">企業一覧</h1>
+      <button class="btn primary" onclick="openAddModal()"><i class="ti ti-plus"></i>企業を追加</button>
+    </div>
+    <div class="content" id="main-content">
+      <div class="company-list" id="companyList"></div>
+    </div>
+  </div>
+  <div class="detail" id="detailPanel">
+    <div class="empty-detail">
+      <i class="ti ti-building" style="font-size:28px;"></i>
+      企業を選択してください
+    </div>
+  </div>
+</div>
+
+<!-- 企業追加モーダル -->
+<div id="modal-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:100;display:none;align-items:center;justify-content:center;">
+  <div style="background:#fff;border-radius:12px;padding:24px;width:400px;max-width:90vw;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+      <span style="font-size:14px;font-weight:500;">企業を追加</span>
+      <button class="icon-btn" onclick="closeModal()"><i class="ti ti-x"></i></button>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      <input type="text" id="new-name" placeholder="企業名 *" style="padding:8px 10px;border:1px solid #ddd;border-radius:8px;font-size:13px;">
+      <input type="text" id="new-industry" placeholder="業種" style="padding:8px 10px;border:1px solid #ddd;border-radius:8px;font-size:13px;">
+      <input type="text" id="new-size" placeholder="従業員規模（例: 100名）" style="padding:8px 10px;border:1px solid #ddd;border-radius:8px;font-size:13px;">
+      <select id="new-status" style="padding:8px 10px;border:1px solid #ddd;border-radius:8px;font-size:13px;">
+        <option value="prospect">見込み</option>
+        <option value="active">商談中</option>
+        <option value="hold">保留</option>
+      </select>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:16px;justify-content:flex-end;">
+      <button class="btn" onclick="closeModal()">キャンセル</button>
+      <button class="btn primary" onclick="addCompany()">追加する</button>
+    </div>
+  </div>
+</div>
+
+<script>
+let companies = JSON.parse(localStorage.getItem('ra_companies') || 'null') || [
+  {
+    id:1,name:"株式会社ヒトタス",industry:"人材・採用支援",size:"50名",
+    status:"active",lastContact:"2026-06-15",nextAction:"6/20 求人継続可否の返答",
+    keywords:["求人クローズ","要件変更","紹介停止","契約"],
+    mailAlerts:[{subject:"当該求人のご紹介状況について確認のお願い",snippet:"直近約3か月ほどご紹介をいただけていない状況...",date:"2026-06-15",tag:"close",tagLabel:"求人クローズ検討"}],
+    docs:[
+      {name:"業務委託契約書_ヒトタス_2025.pdf",type:"contract",date:"2025-04-01",driveUrl:"https://drive.google.com"},
+      {name:"覚書_手数料改定_2026.pdf",type:"memo",date:"2026-01-15",driveUrl:"https://drive.google.com"}
+    ],
+    notionLinks:[
+      {title:"ヒトタス 案件管理ページ",url:"https://notion.so"},
+      {title:"採用要件まとめ（最新）",url:"https://notion.so"}
+    ],
+    refund:{rate:"30%",period:"入社後90日以内",condition:"自己都合退職の場合",memo:"90〜180日以内は15%返金。180日超は返金なし。"},
+    checklist:[
+      {id:1,text:"契約書の署名・捺印確認",done:true,priority:"high",note:"2025/04/01 完了"},
+      {id:2,text:"返金規定の説明と同意取得",done:true,priority:"high",note:""},
+      {id:3,text:"採用要件の最新版を書面で受領",done:false,priority:"high",note:"口頭では確認済みだが書面未受領"},
+      {id:4,text:"請求先部署・担当者の確認",done:false,priority:"med",note:""},
+      {id:5,text:"求人票の公開範囲の確認",done:false,priority:"low",note:""}
+    ],
+    checkMemo:"採用要件は随時変わるとのこと。定期確認が必要。"
+  },
+  {
+    id:2,name:"NOWALL株式会社",industry:"スタートアップ",size:"30名",
+    status:"prospect",lastContact:"2026-06-15",nextAction:"6/19 内山さん面接",
+    keywords:["書類選考","要件変更","ポジション追加"],
+    mailAlerts:[{subject:"書類選考通過／内山 結命様",snippet:"ぜひ一次選考を実施させていただきたく...",date:"2026-06-15",tag:"change",tagLabel:"選考進捗"}],
+    docs:[],
+    notionLinks:[{title:"NOWALL 選考状況トラッキング",url:"https://notion.so"}],
+    refund:{rate:"未設定",period:"—",condition:"—",memo:"契約締結前のため未定。"},
+    checklist:[
+      {id:1,text:"契約書の署名・捺印確認",done:false,priority:"high",note:"まだ契約未締結"},
+      {id:2,text:"返金規定の説明と同意取得",done:false,priority:"high",note:""},
+      {id:3,text:"採用要件の最新版を書面で受領",done:false,priority:"high",note:""},
+      {id:4,text:"請求先部署・担当者の確認",done:false,priority:"med",note:""},
+      {id:5,text:"求人票の公開範囲の確認",done:false,priority:"low",note:""}
+    ],
+    checkMemo:"見込み段階。契約前に返金規定の説明を忘れずに。"
+  }
+];
+
+let selectedId = null;
+
+function save() { localStorage.setItem('ra_companies', JSON.stringify(companies)); }
+
+function renderList() {
+  const list = document.getElementById("companyList");
+  list.innerHTML = companies.map(c => {
+    const days = Math.floor((new Date("2026-06-15") - new Date(c.lastContact))/86400000);
+    const undone = c.checklist.filter(x=>!x.done).length;
+    const highUndone = c.checklist.filter(x=>!x.done && x.priority==="high").length;
+    return `<div class="company-card ${selectedId===c.id?'selected':''}" onclick="selectCompany(${c.id})">
+      <div class="company-top">
+        <div class="company-icon">${c.name.slice(0,2)}</div>
+        <div style="flex:1;min-width:0;">
+          <div class="company-name">${c.name}</div>
+          <div class="company-meta">${c.industry} · ${c.size}</div>
+        </div>
+        <span class="status-badge ${c.status==='active'?'s-active':c.status==='prospect'?'s-prospect':'s-hold'}">${c.status==='active'?'商談中':c.status==='prospect'?'見込み':'保留'}</span>
+        ${c.mailAlerts.length>0?'<div class="alert-dot-red" title="アラートあり"></div>':''}
+      </div>
+      <div class="company-bottom">
+        <div class="meta-chip"><i class="ti ti-clock"></i>${days===0?'本日':days+'日前'}</div>
+        <div class="meta-chip"><i class="ti ti-file"></i>${c.docs.length}件</div>
+        ${highUndone>0
+          ?`<div class="meta-chip" style="color:#A32D2D;"><i class="ti ti-alert-circle"></i>要確認 ${highUndone}件</div>`
+          :`<div class="meta-chip" style="color:${undone===0?'#3B6D11':'#999'}"><i class="ti ti-circle-check"></i>${undone===0?'確認済み':'未完 '+undone+'件'}</div>`}
+      </div>
+    </div>`;
+  }).join("");
+  updateAlertCount();
+}
+
+function updateAlertCount() {
+  const total = companies.reduce((a,c)=>a+c.mailAlerts.length,0);
+  document.getElementById("alert-count").textContent = total;
+}
+
+function selectCompany(id) {
+  selectedId = id;
+  renderList();
+  const c = companies.find(x=>x.id===id);
+  const panel = document.getElementById("detailPanel");
+  const undone = c.checklist.filter(x=>!x.done).length;
+  const alertCount = c.mailAlerts.length;
+  panel.innerHTML = `
+    <div class="detail-header">
+      <div style="display:flex;align-items:center;gap:8px;">
+        <div class="company-icon" style="width:36px;height:36px;">${c.name.slice(0,2)}</div>
+        <div><div class="detail-name">${c.name}</div><div class="detail-sub">${c.industry} · ${c.size}</div></div>
+      </div>
+      <div class="detail-actions">
+        <button class="btn" style="font-size:11px;" onclick="editStatus(${id})"><i class="ti ti-edit"></i>編集</button>
+        <button class="btn" style="font-size:11px;color:#A32D2D;border-color:#A32D2D;" onclick="deleteCompany(${id})"><i class="ti ti-trash"></i>削除</button>
+      </div>
+    </div>
+    <div class="tab-bar">
+      <div class="tab active" id="dt-overview" onclick="switchTab('overview',${id})">概要</div>
+      <div class="tab" id="dt-contract" onclick="switchTab('contract',${id})">契約・書類</div>
+      <div class="tab" id="dt-check" onclick="switchTab('check',${id})">確認事項${undone>0?' ('+undone+')':''}</div>
+      <div class="tab" id="dt-alert" onclick="switchTab('alert',${id})">アラート${alertCount>0?' ('+alertCount+')':''}</div>
+    </div>
+    <div id="dt-content-overview" class="detail-content">${renderOverview(c)}</div>
+    <div id="dt-content-contract" class="detail-content" style="display:none">${renderContract(c)}</div>
+    <div id="dt-content-check" class="detail-content" style="display:none">${renderChecklist(c)}</div>
+    <div id="dt-content-alert" class="detail-content" style="display:none">${renderAlerts(c)}</div>
+  `;
+}
+
+function switchTab(tab, id) {
+  ["overview","contract","check","alert"].forEach(t=>{
+    const el=document.getElementById("dt-"+t), ct=document.getElementById("dt-content-"+t);
+    if(el) el.className="tab"+(t===tab?" active":"");
+    if(ct) ct.style.display=t===tab?"block":"none";
+  });
+}
+
+function renderOverview(c) {
+  return `
+    ${c.nextAction?`<div class="next-action-box"><i class="ti ti-calendar-event"></i><div class="next-action-text"><strong>次回アクション：</strong>${c.nextAction}</div></div>`:''}
+    <div class="field-label">ステータス</div>
+    <div class="field-value"><span class="status-badge ${c.status==='active'?'s-active':c.status==='prospect'?'s-prospect':'s-hold'}" style="font-size:12px;">${c.status==='active'?'商談中':c.status==='prospect'?'見込み':'保留'}</span></div>
+    <div class="field-label">最終折衝日</div>
+    <div class="field-value">${c.lastContact}</div>
+    <div class="divider"></div>
+    <div class="field-label">監視キーワード</div>
+    <div style="display:flex;flex-wrap:wrap;gap:2px;margin-bottom:14px;">
+      ${c.keywords.map((k,i)=>`<span class="kw-tag">${k}<i class="ti ti-x" onclick="removeKeyword(${c.id},${i})"></i></span>`).join('')}
+    </div>
+    <div class="add-row" style="margin-bottom:14px;">
+      <input type="text" id="kw-inp-${c.id}" placeholder="キーワードを追加" onkeydown="if(event.key==='Enter')addKeyword(${c.id})">
+      <button class="btn primary" style="font-size:11px;" onclick="addKeyword(${c.id})"><i class="ti ti-plus"></i></button>
+    </div>
+    <div class="field-label">返金規定</div>
+    <div class="field-value">${c.refund.rate} · ${c.refund.period}</div>
+    <div class="field-label">次回アクション</div>
+    <input type="text" value="${c.nextAction||''}" onchange="updateNextAction(${c.id},this.value)" style="width:100%;padding:6px 10px;border:1px solid #ddd;border-radius:8px;font-size:12px;margin-bottom:14px;">
+    <div class="field-label">最終折衝日</div>
+    <input type="date" value="${c.lastContact}" onchange="updateLastContact(${c.id},this.value)" style="width:100%;padding:6px 10px;border:1px solid #ddd;border-radius:8px;font-size:12px;">
+  `;
+}
+
+function renderContract(c) {
+  const dtIcon={contract:"ti-file-certificate",memo:"ti-file-description",other:"ti-file"};
+  const dtLabel={contract:"契約書",memo:"覚書・念書",other:"その他"};
+  return `
+    <div class="section-block">
+      <div class="section-block-title"><i class="ti ti-brand-google-drive" style="color:#0F9D58;"></i>Google Drive — 契約書・覚書</div>
+      ${c.docs.length===0?'<div style="font-size:12px;color:#aaa;padding:6px 0;">ファイル未登録</div>':''}
+      ${c.docs.map((d,i)=>`
+        <div class="doc-row">
+          <i class="ti ${dtIcon[d.type]||'ti-file'}" style="font-size:15px;color:${d.type==='contract'?'#534AB7':d.type==='memo'?'#BA7517':'#888'};flex-shrink:0;"></i>
+          <div style="flex:1;min-width:0;">
+            <div class="doc-name">${d.name}</div>
+            <div style="font-size:10px;color:#aaa;margin-top:2px;">${dtLabel[d.type]||'書類'} · ${d.date}</div>
+          </div>
+          <div class="doc-actions">
+            <button class="icon-btn" title="Driveで開く" onclick="window.open('${d.driveUrl}','_blank')"><i class="ti ti-external-link"></i></button>
+            <button class="icon-btn" title="削除" onclick="removeDoc(${c.id},${i})"><i class="ti ti-trash"></i></button>
+          </div>
+        </div>
+      `).join('')}
+      <div class="add-row"><input type="text" id="doc-name-${c.id}" placeholder="ファイル名">
+        <select id="doc-type-${c.id}" style="padding:5px 8px;border:1px solid #ddd;border-radius:8px;font-size:12px;">
+          <option value="contract">契約書</option><option value="memo">覚書</option><option value="other">その他</option>
+        </select>
+        <button class="btn primary" style="font-size:11px;" onclick="addDoc(${c.id})"><i class="ti ti-plus"></i></button>
+      </div>
+      <div class="add-row" style="margin-top:4px;"><input type="text" id="doc-url-${c.id}" placeholder="Google Drive URL" style="flex:1;"></div>
+    </div>
+    <div class="divider"></div>
+    <div class="section-block">
+      <div class="section-block-title"><i class="ti ti-link"></i>Notionリンク</div>
+      ${c.notionLinks.length===0?'<div style="font-size:12px;color:#aaa;padding:6px 0;">リンク未登録</div>':''}
+      ${c.notionLinks.map((n,i)=>`
+        <div class="notion-row">
+          <i class="ti ti-brand-notion" style="font-size:16px;color:#555;flex-shrink:0;"></i>
+          <div style="flex:1;min-width:0;">
+            <div class="notion-title">${n.title}</div>
+            <div class="notion-url">${n.url}</div>
+          </div>
+          <div class="doc-actions">
+            <button class="icon-btn" onclick="window.open('${n.url}','_blank')"><i class="ti ti-external-link"></i></button>
+            <button class="icon-btn" onclick="removeNotion(${c.id},${i})"><i class="ti ti-trash"></i></button>
+          </div>
+        </div>
+      `).join('')}
+      <div class="add-row"><input type="text" id="notion-title-${c.id}" placeholder="ページ名"></div>
+      <div class="add-row" style="margin-top:4px;">
+        <input type="text" id="notion-url-${c.id}" placeholder="https://notion.so/..." style="flex:1;">
+        <button class="btn primary" style="font-size:11px;" onclick="addNotion(${c.id})"><i class="ti ti-plus"></i>追加</button>
+      </div>
+    </div>
+    <div class="divider"></div>
+    <div class="section-block">
+      <div class="section-block-title"><i class="ti ti-receipt-refund"></i>返金規定</div>
+      <div class="refund-box">
+        <div class="refund-row"><span class="refund-label">返金率</span><input type="text" value="${c.refund.rate}" onchange="updateRefund(${c.id},'rate',this.value)" style="flex:1;border:none;background:transparent;font-size:12px;outline:none;"></div>
+        <div class="refund-row"><span class="refund-label">対象期間</span><input type="text" value="${c.refund.period}" onchange="updateRefund(${c.id},'period',this.value)" style="flex:1;border:none;background:transparent;font-size:12px;outline:none;"></div>
+        <div class="refund-row"><span class="refund-label">条件</span><input type="text" value="${c.refund.condition}" onchange="updateRefund(${c.id},'condition',this.value)" style="flex:1;border:none;background:transparent;font-size:12px;outline:none;"></div>
+        <div class="refund-row"><span class="refund-label">補足</span><input type="text" value="${c.refund.memo}" onchange="updateRefund(${c.id},'memo',this.value)" style="flex:1;border:none;background:transparent;font-size:12px;outline:none;"></div>
+      </div>
+    </div>
+  `;
+}
+
+function renderChecklist(c) {
+  const done=c.checklist.filter(x=>x.done).length;
+  const pct=c.checklist.length>0?Math.round(done/c.checklist.length*100):0;
+  return `
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
+      <div class="progress-bar"><div class="progress-fill" style="width:${pct}%;"></div></div>
+      <span style="font-size:11px;color:#aaa;">${done}/${c.checklist.length}</span>
+    </div>
+    <div id="cl-list-${c.id}">${c.checklist.map(item=>checkItemHTML(c.id,item)).join('')}</div>
+    <div class="add-row" style="margin-top:12px;">
+      <select id="cl-pri-${c.id}" style="padding:5px 8px;border:1px solid #ddd;border-radius:8px;font-size:12px;width:64px;">
+        <option value="high">高</option><option value="med" selected>中</option><option value="low">低</option>
+      </select>
+      <input type="text" id="cl-inp-${c.id}" placeholder="確認事項を追加..." onkeydown="if(event.key==='Enter')addCheck(${c.id})">
+      <button class="btn primary" style="font-size:11px;" onclick="addCheck(${c.id})"><i class="ti ti-plus"></i></button>
+    </div>
+    <div class="divider"></div>
+    <div class="field-label">メモ・補足</div>
+    <textarea class="memo-area" id="cl-memo-${c.id}" onblur="saveCheckMemo(${c.id})" placeholder="自由メモ...">${c.checkMemo||''}</textarea>
+  `;
+}
+
+function checkItemHTML(cid,item) {
+  const pClass=item.priority==='high'?'p-high':item.priority==='med'?'p-med':'p-low';
+  const pLabel=item.priority==='high'?'優先高':item.priority==='med'?'優先中':'優先低';
+  return `<div class="check-item">
+    <div class="check-box ${item.done?'checked':''}" onclick="toggleCheck(${cid},${item.id})">
+      ${item.done?'<i class="ti ti-check"></i>':''}
+    </div>
+    <div style="flex:1;">
+      <div class="check-label ${item.done?'done':''}">${item.text}</div>
+      ${item.note?`<div class="check-note">${item.note}</div>`:''}
+    </div>
+    <span class="check-priority ${pClass}">${pLabel}</span>
+  </div>`;
+}
+
+function renderAlerts(c) {
+  if(!c.mailAlerts.length) return '<div style="text-align:center;padding:30px;color:#aaa;font-size:12px;"><i class="ti ti-mail-check" style="font-size:24px;display:block;margin-bottom:8px;"></i>アラートはありません</div>';
+  return c.mailAlerts.map((a,i)=>`
+    <div class="mail-alert-card">
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;">
+        <span class="alert-tag ${a.tag==='change'?'tag-change':a.tag==='close'?'tag-close':'tag-urgent'}">${a.tagLabel}</span>
+        <span style="font-size:10px;color:#aaa;margin-left:auto;">${a.date}</span>
+        <button class="icon-btn" title="削除" onclick="removeAlert(${c.id},${i})"><i class="ti ti-x"></i></button>
+      </div>
+      <div style="font-size:12px;font-weight:500;margin-bottom:4px;">${a.subject}</div>
+      <div style="font-size:11px;color:#666;line-height:1.5;">${a.snippet}</div>
+    </div>
+  `).join('');
+}
+
+function showAlerts() {
+  document.getElementById("nav-co").className="nav-item";
+  document.getElementById("nav-al").className="nav-item active";
+  document.getElementById("view-title").textContent="メールアラート";
+  const allAlerts=[];
+  companies.forEach(c=>c.mailAlerts.forEach(a=>allAlerts.push({...a,company:c.name,cid:c.id})));
+  const mc=document.getElementById("main-content");
+  mc.innerHTML = allAlerts.length===0
+    ?'<div style="text-align:center;padding:40px;color:#aaa;font-size:13px;"><i class="ti ti-mail-check" style="font-size:32px;display:block;margin-bottom:12px;"></i>アラートはありません</div>'
+    :allAlerts.map(a=>`
+      <div class="mail-alert-card" style="margin-bottom:8px;cursor:pointer;" onclick="selectCompany(${a.cid});showCompanies();">
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;">
+          <span class="alert-tag ${a.tag==='change'?'tag-change':a.tag==='close'?'tag-close':'tag-urgent'}">${a.tagLabel}</span>
+          <span style="font-size:11px;color:#534AB7;font-weight:500;">${a.company}</span>
+          <span style="font-size:10px;color:#aaa;margin-left:auto;">${a.date}</span>
+        </div>
+        <div style="font-size:12px;font-weight:500;margin-bottom:4px;">${a.subject}</div>
+        <div style="font-size:11px;color:#666;line-height:1.5;">${a.snippet}</div>
+      </div>
+    `).join('');
+}
+
+function showCompanies() {
+  document.getElementById("nav-co").className="nav-item active";
+  document.getElementById("nav-al").className="nav-item";
+  document.getElementById("view-title").textContent="企業一覧";
+  document.getElementById("main-content").innerHTML='<div class="company-list" id="companyList"></div>';
+  renderList();
+}
+
+function toggleCheck(cid,itemId) {
+  const c=companies.find(x=>x.id===cid);
+  const item=c.checklist.find(x=>x.id===itemId);
+  item.done=!item.done; save();
+  const listEl=document.getElementById(`cl-list-${cid}`);
+  if(listEl) listEl.innerHTML=c.checklist.map(i=>checkItemHTML(cid,i)).join('');
+  renderList();
+}
+
+function addCheck(cid) {
+  const c=companies.find(x=>x.id===cid);
+  const inp=document.getElementById(`cl-inp-${cid}`);
+  const pri=document.getElementById(`cl-pri-${cid}`);
+  const val=inp.value.trim(); if(!val) return;
+  const newId=Math.max(...c.checklist.map(x=>x.id),0)+1;
+  c.checklist.push({id:newId,text:val,done:false,priority:pri.value,note:""});
+  inp.value=""; save();
+  const listEl=document.getElementById(`cl-list-${cid}`);
+  if(listEl) listEl.innerHTML=c.checklist.map(i=>checkItemHTML(cid,i)).join('');
+  renderList();
+}
+
+function saveCheckMemo(cid) {
+  const c=companies.find(x=>x.id===cid);
+  const el=document.getElementById(`cl-memo-${cid}`);
+  if(el){c.checkMemo=el.value; save();}
+}
+
+function addKeyword(cid) {
+  const c=companies.find(x=>x.id===cid);
+  const inp=document.getElementById(`kw-inp-${cid}`);
+  const val=inp.value.trim(); if(!val) return;
+  c.keywords.push(val); inp.value=""; save();
+  selectCompany(cid);
+}
+
+function removeKeyword(cid,idx) {
+  companies.find(x=>x.id===cid).keywords.splice(idx,1); save(); selectCompany(cid);
+}
+
+function addDoc(cid) {
+  const c=companies.find(x=>x.id===cid);
+  const name=document.getElementById(`doc-name-${cid}`).value.trim();
+  const url=document.getElementById(`doc-url-${cid}`).value.trim();
+  const type=document.getElementById(`doc-type-${cid}`).value;
+  if(!name) return;
+  c.docs.push({name,type,date:new Date().toISOString().slice(0,10),driveUrl:url||"#"});
+  save(); selectCompany(cid); switchTab('contract',cid);
+}
+
+function removeDoc(cid,idx) {
+  companies.find(x=>x.id===cid).docs.splice(idx,1); save(); selectCompany(cid); switchTab('contract',cid);
+}
+
+function addNotion(cid) {
+  const c=companies.find(x=>x.id===cid);
+  const title=document.getElementById(`notion-title-${cid}`).value.trim();
+  const url=document.getElementById(`notion-url-${cid}`).value.trim();
+  if(!title||!url) return;
+  c.notionLinks.push({title,url}); save(); selectCompany(cid); switchTab('contract',cid);
+}
+
+function removeNotion(cid,idx) {
+  companies.find(x=>x.id===cid).notionLinks.splice(idx,1); save(); selectCompany(cid); switchTab('contract',cid);
+}
+
+function removeAlert(cid,idx) {
+  companies.find(x=>x.id===cid).mailAlerts.splice(idx,1); save(); selectCompany(cid); switchTab('alert',cid); updateAlertCount();
+}
+
+function updateRefund(cid,key,val) {
+  companies.find(x=>x.id===cid).refund[key]=val; save();
+}
+
+function updateNextAction(cid,val) {
+  companies.find(x=>x.id===cid).nextAction=val; save();
+}
+
+function updateLastContact(cid,val) {
+  companies.find(x=>x.id===cid).lastContact=val; save(); renderList();
+}
+
+function editStatus(id) {
+  const c=companies.find(x=>x.id===id);
+  const s=prompt("ステータスを入力（active / prospect / hold）",c.status);
+  if(s&&["active","prospect","hold"].includes(s)){c.status=s; save(); selectCompany(id); renderList();}
+}
+
+function deleteCompany(id) {
+  if(!confirm("この企業を削除しますか？")) return;
+  companies=companies.filter(x=>x.id!==id); save();
+  selectedId=null; renderList();
+  document.getElementById("detailPanel").innerHTML='<div class="empty-detail"><i class="ti ti-building" style="font-size:28px;"></i>企業を選択してください</div>';
+}
+
+function openAddModal() {
+  document.getElementById("modal-overlay").style.display="flex";
+}
+
+function closeModal() {
+  document.getElementById("modal-overlay").style.display="none";
+}
+
+function addCompany() {
+  const name=document.getElementById("new-name").value.trim();
+  if(!name){alert("企業名を入力してください"); return;}
+  const newId=Math.max(...companies.map(x=>x.id),0)+1;
+  companies.push({
+    id:newId,
+    name,
+    industry:document.getElementById("new-industry").value||"—",
+    size:document.getElementById("new-size").value||"—",
+    status:document.getElementById("new-status").value,
+    lastContact:new Date().toISOString().slice(0,10),
+    nextAction:"",
+    keywords:[],
+    mailAlerts:[],
+    docs:[],
+    notionLinks:[],
+    refund:{rate:"",period:"",condition:"",memo:""},
+    checklist:[
+      {id:1,text:"契約書の署名・捺印確認",done:false,priority:"high",note:""},
+      {id:2,text:"返金規定の説明と同意取得",done:false,priority:"high",note:""},
+      {id:3,text:"採用要件の最新版を書面で受領",done:false,priority:"high",note:""},
+      {id:4,text:"請求先部署・担当者の確認",done:false,priority:"med",note:""},
+      {id:5,text:"求人票の公開範囲の確認",done:false,priority:"low",note:""}
+    ],
+    checkMemo:""
+  });
+  save(); closeModal(); renderList();
+  ["new-name","new-industry","new-size"].forEach(id=>document.getElementById(id).value="");
+}
+
+renderList();
+</script>
+</body>
+</html>
