@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RA企業管理ツール</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f5f5f0;color:#1a1a1a;font-size:14px;}
+.app{display:flex;height:100vh;}
+.sidebar{width:180px;flex-shrink:0;border-right:1px solid #e5e5e0;padding:16px 0;background:#fafaf8;display:flex;flex-direction:column;}
+.sidebar-logo{font-size:13px;font-weight:600;padding:0 14px 14px;border-bottom:1px solid #e5e5e0;margin-bottom:10px;display:flex;align-items:center;gap:6px;}
+.sidebar-section{font-size:10px;color:#bbb;padding:0 14px 4px;letter-spacing:0.05em;text-transform:uppercase;}
+.nav-item{display:flex;align-items:center;gap:8px;padding:7px 14px;cursor:pointer;color:#666;font-size:12px;border-left:2px solid transparent;}
+.nav-item:hover{background:#f0f0ea;color:#1a1a1a;}
+.nav-item.active{color:#1a1a1a;border-left-color:#534AB7;background:#fff;font-weight:500;}
+.nav-item i{font-size:15px;}
+.staff-filter{padding:10px 14px;border-top:1px solid #e5e5e0;margin-top:8px;}
+.staff-label{font-size:10px;color:#bbb;letter-spacing:0.05em;text-transform:uppercase;margin-bottom:6px;}
+.staff-btn{display:flex;align-items:center;gap:6px;padding:5px 8px;border-radius:7px;cursor:pointer;font-size:11px;color:#666;margin-bottom:3px;}
+.staff-btn:hover{background:#f0f0ea;}
+.staff-btn.active{background:#EEEDFE;color:#3C3489;font-weight:500;}
+.staff-avatar{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;flex-shrink:0;}
+.main{width:280px;flex-shrink:0;overflow:hidden;display:flex;flex-direction:column;border-right:1px solid #e5e5e0;}
+.topbar{padding:10px 14px;border-bottom:1px solid #e5e5e0;display:flex;align-items:center;gap:8px;background:#fff;}
+.topbar h1{font-size:13px;font-weight:500;flex:1;}
+.btn{padding:5px 12px;border-radius:8px;border:1px solid #ddd;background:transparent;font-size:12px;cursor:pointer;color:#1a1a1a;display:inline-flex;align-items:center;gap:5px;transition:background 0.1s;}
+.btn:hover{background:#f5f5f0;}
+.btn.primary{background:#534AB7;color:#fff;border-color:#534AB7;}
+.btn.primary:hover{background:#3C3489;}
+.btn.danger{color:#A32D2D;border-color:#fcc;}
+.btn.danger:hover{background:#fff5f5;}
+.btn.sm{padding:4px 9px;font-size:11px;}
+.content{flex:1;overflow-y:auto;padding:10px;}
+.search-bar{display:flex;align-items:center;gap:6px;padding:6px 10px;border:1px solid #e5e5e0;border-radius:8px;background:#fff;margin-bottom:8px;}
+.search-bar input{border:none;background:transparent;flex:1;font-size:12px;outline:none;}
+.company-list{display:flex;flex-direction:column;gap:5px;}
+.company-card{background:#fff;border:1px solid #e5e5e0;border-radius:10px;padding:9px 11px;cursor:pointer;transition:border-color 0.15s;}
+.company-card:hover{border-color:#bbb;}
+.company-card.selected{border-color:#534AB7;background:#fdfcff;}
+.company-top{display:flex;align-items:center;gap:7px;}
+.company-icon{width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:10px;flex-shrink:0;background:#EEEDFE;color:#3C3489;}
+.company-name{font-size:12px;font-weight:500;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.status-badge{font-size:10px;padding:2px 6px;border-radius:20px;flex-shrink:0;white-space:nowrap;}
+.s-active{background:#EAF3DE;color:#3B6D11;}
+.s-approval{background:#E6F1FB;color:#0C447C;}
+.s-contracted{background:#EEEDFE;color:#3C3489;}
+.s-review{background:#FAEEDA;color:#633806;}
+.s-shrink{background:#FCEBEB;color:#A32D2D;}
+.company-bottom{display:flex;align-items:center;gap:8px;margin-top:5px;}
+.meta-chip{display:flex;align-items:center;gap:3px;font-size:10px;color:#aaa;}
+.job-tabs{display:flex;flex-direction:column;gap:1px;padding:6px 8px;border-bottom:1px solid #e5e5e0;}
+.job-tab{display:flex;align-items:center;justify-content:space-between;padding:5px 8px;border-radius:7px;cursor:pointer;font-size:11px;color:#666;}
+.job-tab:hover{background:#f0f0ea;}
+.job-tab.active{background:#EEEDFE;color:#3C3489;font-weight:500;}
+.job-tab-count{font-size:10px;padding:1px 5px;border-radius:20px;background:#e5e5e0;color:#888;}
+.job-tab.active .job-tab-count{background:#534AB7;color:#fff;}
+/* 右パネル */
+.detail{flex:1;overflow-y:auto;background:#fff;display:flex;flex-direction:column;}
+.detail-header{padding:16px 20px;border-bottom:1px solid #e5e5e0;}
+.detail-name{font-size:17px;font-weight:600;}
+.detail-sub{font-size:12px;color:#999;margin-top:2px;}
+.detail-actions{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap;}
+.tab-bar{display:flex;border-bottom:1px solid #e5e5e0;padding:0 20px;overflow-x:auto;flex-shrink:0;}
+.tab{padding:10px 0;margin-right:16px;font-size:12px;cursor:pointer;color:#999;border-bottom:2px solid transparent;white-space:nowrap;}
+.tab.active{color:#1a1a1a;border-bottom-color:#534AB7;font-weight:500;}
+.detail-body{flex:1;overflow-y:auto;}
+.detail-content{padding:20px;}
+.field-label{font-size:10px;color:#999;margin-bottom:5px;letter-spacing:0.05em;text-transform:uppercase;font-weight:500;}
+.divider{border:none;border-top:1px solid #f0f0ea;margin:16px 0;}
+.form-input{width:100%;padding:8px 10px;border:1px solid #ddd;border-radius:8px;font-size:13px;font-family:inherit;background:#fff;color:#1a1a1a;}
+.form-input:focus{outline:none;border-color:#534AB7;}
+.form-row{display:flex;gap:8px;}
+.form-row .fg{flex:1;}
+.fg{margin-bottom:12px;}
+.memo-area{width:100%;border:1px solid #ddd;border-radius:8px;padding:8px 10px;font-size:13px;font-family:inherit;resize:vertical;min-height:72px;background:#fff;}
+.memo-area:focus{outline:none;border-color:#534AB7;}
+/* 折衝 */
+.neg-item{background:#fafaf8;border-radius:10px;padding:13px 15px;margin-bottom:10px;border-left:3px solid #534AB7;}
+.neg-header{display:flex;align-items:center;gap:8px;margin-bottom:7px;}
+.neg-date{font-size:12px;font-weight:500;color:#534AB7;}
+.neg-type{font-size:10px;padding:2px 7px;border-radius:20px;background:#EEEDFE;color:#3C3489;}
+.neg-body{font-size:13px;line-height:1.7;margin-bottom:7px;white-space:pre-wrap;}
+.neg-next{font-size:12px;color:#666;display:flex;align-items:flex-start;gap:6px;background:#f0f0ea;border-radius:6px;padding:7px 10px;}
+.neg-next i{color:#534AB7;font-size:14px;flex-shrink:0;margin-top:1px;}
+/* メールトリガー */
+.trigger-box{background:#fff;border:1px solid #e5e5e0;border-radius:10px;padding:14px 16px;margin-top:12px;}
+.trigger-title{font-size:11px;font-weight:600;color:#555;margin-bottom:10px;display:flex;align-items:center;gap:5px;}
+.trigger-tag{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;background:#f0f0ea;border:1px solid #e5e5e0;font-size:12px;margin:2px;}
+.trigger-tag a{color:#534AB7;text-decoration:none;font-size:11px;}
+.trigger-tag a:hover{text-decoration:underline;}
+.trigger-tag .rm{font-size:12px;color:#aaa;cursor:pointer;margin-left:2px;}
+/* 基本情報 */
+.contact-card{background:#fafaf8;border-radius:8px;padding:12px 14px;margin-bottom:8px;}
+.biz-card-area{border:2px dashed #e5e5e0;border-radius:10px;padding:16px;text-align:center;cursor:pointer;color:#bbb;font-size:12px;margin-bottom:8px;}
+.biz-card-area:hover{border-color:#534AB7;color:#534AB7;}
+.biz-card-item{display:flex;align-items:center;gap:8px;padding:7px 10px;background:#fafaf8;border-radius:8px;margin-bottom:5px;}
+/* ポジション */
+.pos-block{background:#fafaf8;border-radius:10px;padding:14px 16px;margin-bottom:12px;}
+.pos-name-row{display:flex;align-items:center;gap:8px;margin-bottom:10px;}
+.pos-badge{font-size:10px;padding:2px 7px;border-radius:20px;}
+.pos-open{background:#EAF3DE;color:#3B6D11;}
+.pos-filled{background:#E6F1FB;color:#0C447C;}
+.month-table{width:100%;border-collapse:collapse;font-size:12px;}
+.month-table th{font-size:10px;color:#999;padding:4px 6px;text-align:center;border-bottom:1px solid #e5e5e0;}
+.month-table td{padding:5px 6px;text-align:center;border-bottom:1px solid #f0f0ea;}
+.month-table input{width:44px;padding:3px 4px;border:1px solid #ddd;border-radius:5px;font-size:11px;text-align:center;}
+/* 書類・Notion */
+.doc-row{display:flex;align-items:center;gap:8px;padding:9px 12px;background:#fafaf8;border-radius:8px;margin-bottom:6px;}
+.notion-row{display:flex;align-items:center;gap:8px;padding:9px 12px;background:#fafaf8;border-radius:8px;margin-bottom:6px;}
+.refund-box{background:#fafaf8;border-radius:8px;padding:14px;}
+.refund-row{display:flex;gap:10px;padding:7px 0;border-bottom:1px solid #f0f0ea;align-items:flex-start;}
+.refund-row:last-child{border-bottom:none;}
+.refund-label{font-size:11px;color:#999;width:80px;flex-shrink:0;padding-top:2px;}
+.section-title{font-size:11px;font-weight:600;color:#555;margin-bottom:8px;display:flex;align-items:center;gap:5px;}
+/* チェックリスト */
+.check-item{display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-bottom:1px solid #f0f0ea;}
+.check-item:last-child{border-bottom:none;}
+.check-box{width:18px;height:18px;border-radius:4px;border:1.5px solid #ccc;flex-shrink:0;cursor:pointer;display:flex;align-items:center;justify-content:center;margin-top:1px;background:#fff;}
+.check-box.checked{background:#534AB7;border-color:#534AB7;}
+.check-box.checked i{color:#fff;font-size:12px;}
+.check-label{font-size:13px;flex:1;line-height:1.5;}
+.check-label.done{color:#aaa;text-decoration:line-through;}
+.check-priority{font-size:10px;padding:2px 6px;border-radius:20px;flex-shrink:0;}
+.p-high{background:#FCEBEB;color:#A32D2D;}
+.p-med{background:#FAEEDA;color:#633806;}
+.p-low{background:#F5F5F0;color:#666;}
+.prog-bar{height:5px;background:#f0f0ea;border-radius:4px;overflow:hidden;flex:1;}
+.prog-fill{height:100%;background:#534AB7;border-radius:4px;}
+.icon-btn{padding:4px 6px;border-radius:6px;border:none;background:transparent;cursor:pointer;color:#aaa;display:inline-flex;align-items:center;font-size:14px;}
+.icon-btn:hover{background:#f0f0ea;color:#1a1a1a;}
+.empty-detail{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:#ccc;font-size:13px;gap:10px;}
+.add-form-box{background:#fafaf8;border-radius:10px;padding:14px;border:1px dashed #ddd;margin-top:8px;}
+.add-form-title{font-size:11px;font-weight:600;color:#555;margin-bottom:10px;}
+/* モーダル */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:100;align-items:flex-start;justify-content:center;padding:32px 16px;overflow-y:auto;}
+.modal-overlay.open{display:flex;}
+.modal{background:#fff;border-radius:14px;padding:24px;width:520px;max-width:100%;}
+.modal-title{font-size:14px;font-weight:600;margin-bottom:18px;display:flex;align-items:center;justify-content:space-between;}
+.form-label{font-size:11px;color:#999;margin-bottom:4px;display:block;letter-spacing:0.04em;text-transform:uppercase;}
+.entry-row{display:flex;align-items:center;gap:8px;padding:6px 10px;background:#f5f5f0;border-radius:8px;margin-bottom:4px;font-size:12px;}
+</style>
+</head>
+<body>
+<div class="app">
+  <!-- サイドバー -->
+  <div class="sidebar">
+    <div class="sidebar-logo"><i class="ti ti-building"></i>RA管理</div>
+    <div class="sidebar-section">職種</div>
+    <div class="job-tabs" id="jobTabs" style="border:none;padding:0 8px;"></div>
+    <div class="staff-filter">
+      <div class="staff-label">担当者フィルター</div>
+      <div class="staff-btn active" id="sf-all" onclick="setStaff('all')">
+        <div class="staff-avatar" style="background:#e5e5e0;color:#888;">全</div>全員
+      </div>
+      <div class="staff-btn" id="sf-inadama" onclick="setStaff('inadama')">
+        <div class="staff-avatar" style="background:#EEEDFE;color:#3C3489;">稲</div>稲玉千尋
+      </div>
+      <div class="staff-btn" id="sf-takemura" onclick="setStaff('takemura')">
+        <div class="staff-avatar" style="background:#EAF3DE;color:#3B6D11;">竹</div>竹村厚美
+      </div>
+    </div>
+    <div style="flex:1;"></div>
+    <div style="padding:10px 14px;font-size:10px;color:#ccc;border-top:1px solid #e5e5e0;">ver 4.0</div>
+  </div>
+
+  <!-- 企業リスト -->
+  <div class="main">
+    <div class="topbar">
+      <h1 id="listTitle">企業一覧</h1>
+      <button class="btn primary sm" onclick="openAddModal()"><i class="ti ti-plus"></i>追加</button>
+    </div>
+    <div class="content">
+      <div class="search-bar">
+        <i class="ti ti-search" style="font-size:13px;color:#ccc;"></i>
+        <input type="text" placeholder="企業名で検索..." oninput="filterList(this.value)">
+      </div>
+      <div class="company-list" id="companyList"></div>
+    </div>
+  </div>
+
+  <!-- 詳細パネル -->
+  <div class="detail" id="detailPanel">
+    <div class="empty-detail"><i class="ti ti-building" style="font-size:32px;"></i>企業を選択してください</div>
+  </div>
+</div>
+
+<!-- モーダル -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <div class="modal-title">
+      <span id="modalTitleText">企業を追加</span>
+      <button class="icon-btn" onclick="closeModal()"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="form-row">
+      <div class="fg" style="flex:2;"><label class="form-label">企業名 *</label><input class="form-input" type="text" id="m-name" placeholder="例: 株式会社○○"></div>
+      <div class="fg"><label class="form-label">従業員規模</label><input class="form-input" type="text" id="m-size" placeholder="例: 100名"></div>
+    </div>
+    <div class="form-row">
+      <div class="fg"><label class="form-label">業種</label><input class="form-input" type="text" id="m-industry" placeholder="例: IT・SaaS"></div>
+      <div class="fg"><label class="form-label">主要職種</label>
+        <select class="form-input" id="m-jobcat">
+          <option value="all">未分類</option>
+          <option value="it">IT・エンジニア</option>
+          <option value="construction">建設・施工管理</option>
+          <option value="sales">営業</option>
+          <option value="office">事務・バックオフィス</option>
+          <option value="service">販売・サービス</option>
+          <option value="other">その他</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="fg"><label class="form-label">成約状況</label>
+        <select class="form-input" id="m-status">
+          <option value="active">商談中</option>
+          <option value="approval">稟議中</option>
+          <option value="contracted">契約済み</option>
+          <option value="review">契約内容見直し中</option>
+          <option value="shrink">シュリンク</option>
+        </select>
+      </div>
+      <div class="fg"><label class="form-label">自社担当者</label>
+        <select class="form-input" id="m-staff">
+          <option value="inadama">稲玉千尋</option>
+          <option value="takemura">竹村厚美</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="fg"><label class="form-label">次回アクション</label><input class="form-input" type="text" id="m-nextaction" placeholder="例: 6/20 確認"></div>
+      <div class="fg"><label class="form-label">集客経路</label><input class="form-input" type="text" id="m-channel" placeholder="例: 紹介・展示会・インバウンド"></div>
+    </div>
+    <div class="divider"></div>
+    <div class="add-form-title">企業側担当者</div>
+    <div id="m-contacts-list"></div>
+    <div style="background:#fafaf8;border-radius:8px;padding:12px;">
+      <div class="form-row"><input class="form-input" type="text" id="mc-name" placeholder="担当者名"><input class="form-input" type="text" id="mc-dept" placeholder="部署"></div>
+      <div class="form-row" style="margin-top:6px;"><input class="form-input" type="text" id="mc-role" placeholder="役職・担当ポジション"><input class="form-input" type="text" id="mc-phone" placeholder="電話番号"></div>
+      <input class="form-input" type="text" id="mc-email" placeholder="メールアドレス" style="margin-top:6px;">
+      <button class="btn sm" style="margin-top:8px;" onclick="addModalContact()"><i class="ti ti-plus"></i>担当者を追加</button>
+    </div>
+    <div class="divider"></div>
+    <div class="add-form-title">採用ポジション（複数可）</div>
+    <div id="m-positions-list"></div>
+    <div style="background:#fafaf8;border-radius:8px;padding:12px;">
+      <input class="form-input" type="text" id="mp-name" placeholder="ポジション名">
+      <div class="form-row" style="margin-top:6px;">
+        <input class="form-input" type="number" id="mp-budget" placeholder="採用予算（万円）" min="0">
+      </div>
+      <button class="btn sm" style="margin-top:8px;" onclick="addModalPosition()"><i class="ti ti-plus"></i>ポジションを追加</button>
+    </div>
+    <div class="divider"></div>
+    <div class="add-form-title">返金規定</div>
+    <div class="form-row"><input class="form-input" type="text" id="m-rrate" placeholder="返金率（例: 30%）"><input class="form-input" type="text" id="m-rperiod" placeholder="対象期間（例: 入社後90日以内）"></div>
+    <input class="form-input" type="text" id="m-rcondition" placeholder="条件" style="margin-top:6px;">
+    <input class="form-input" type="text" id="m-rmemo" placeholder="補足" style="margin-top:6px;">
+    <div class="divider"></div>
+    <label class="form-label">備考・メモ</label>
+    <textarea class="memo-area" id="m-memo" placeholder="特記事項など" style="min-height:60px;"></textarea>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px;">
+      <button class="btn" onclick="closeModal()">キャンセル</button>
+      <button class="btn primary" onclick="saveCompany()">保存する</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const SL={active:"商談中",approval:"稟議中",contracted:"契約済み",review:"契約内容見直し中",shrink:"シュリンク"};
+const SC={active:"s-active",approval:"s-approval",contracted:"s-contracted",review:"s-review",shrink:"s-shrink"};
+const STAFF={inadama:{label:"稲玉千尋",color:"#EEEDFE",tc:"#3C3489",short:"稲"},takemura:{label:"竹村厚美",color:"#EAF3DE",tc:"#3B6D11",short:"竹"}};
+const JOB_CATS=[
+  {key:"all",label:"すべて",icon:"ti-layout-grid"},
+  {key:"it",label:"IT・エンジニア",icon:"ti-device-laptop"},
+  {key:"construction",label:"建設・施工管理",icon:"ti-building-skyscraper"},
+  {key:"sales",label:"営業",icon:"ti-speakerphone"},
+  {key:"office",label:"事務・バックオフィス",icon:"ti-briefcase"},
+  {key:"service",label:"販売・サービス",icon:"ti-shopping-bag"},
+  {key:"other",label:"その他",icon:"ti-dots"},
+];
+const MONTHS=["4月","5月","6月","7月","8月","9月","10月","11月","12月","1月","2月","3月"];
+
+let companies=JSON.parse(localStorage.getItem('ra_v4')||'null')||[
+  {
+    id:1,name:"株式会社オープンアップコンストラクション",industry:"建設・施工管理",size:"500名以上",
+    jobcat:"construction",status:"contracted",staff:"inadama",
+    nextAction:"小寺さん入社日確定の連絡待ち",channel:"紹介",
+    contacts:[{name:"吉田 恵子",dept:"人事部",role:"採用担当",phone:"",email:"openup-construction@mail3.rpm-sys.jp"},{name:"坂本",dept:"人事部",role:"採用担当",phone:"",email:"hr-recruitment@openup-construction.co.jp"}],
+    bizCards:[],
+    positions:[{id:1,name:"施工管理",budget:500,notionLinks:[],
+      monthly:{plan:{},achieved:{}}}],
+    negotiations:[
+      {id:1,date:"2026-06-15",type:"メール確認",content:"蓑浦まひる様：お見送り\n堀丞様：面接リスケ確定\n遠藤和希様：面接リスケ連絡あり",nextAction:"堀さんの日程確認",triggers:[{kw:"堀 丞",memo:"面接日程確認用"}]},
+      {id:2,date:"2026-06-12",type:"内定承諾",content:"小寺史織様の内定承諾確認。9月1日入社希望。",nextAction:"9月入社スケジュール確認",triggers:[]},
+    ],
+    docs:[],notionLinks:[],
+    refund:{rate:"20%",period:"入社後90日以内",condition:"自己都合退職",memo:""},
+    checklist:[
+      {id:1,text:"契約書の署名・捺印確認",done:true,priority:"high",note:""},
+      {id:2,text:"返金規定の説明と同意取得",done:true,priority:"high",note:""},
+      {id:3,text:"採用要件の最新版を書面で受領",done:false,priority:"high",note:""},
+      {id:4,text:"請求先部署・担当者の確認",done:true,priority:"med",note:"吉田様"},
+      {id:5,text:"求人票の公開範囲の確認",done:false,priority:"low",note:""}
+    ],
+    checkMemo:"",keywords:[],memo:""
+  }
+];
+
+let selectedId=null,filterText="",activeJobCat="all",activeStaff="all";
+let modalContacts=[],modalPositions=[],editingId=null;
+
+function save(){localStorage.setItem('ra_v4',JSON.stringify(companies));}
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function sb(s){return `<span class="status-badge ${SC[s]||'s-active'}">${SL[s]||s}</span>`;}
+
+/* ── サイドバー ── */
+function renderJobTabs(){
+  document.getElementById("jobTabs").innerHTML=JOB_CATS.map(j=>{
+    const cnt=j.key==="all"?companies.length:companies.filter(c=>c.jobcat===j.key).length;
+    return `<div class="job-tab ${activeJobCat===j.key?'active':''}" onclick="setJobCat('${j.key}')">
+      <span style="display:flex;align-items:center;gap:5px;"><i class="ti ${j.icon}" style="font-size:13px;"></i>${j.label}</span>
+      <span class="job-tab-count">${cnt}</span></div>`;
+  }).join('');
+}
+function setJobCat(c){activeJobCat=c;renderJobTabs();renderList();}
+function setStaff(s){
+  activeStaff=s;
+  ["all","inadama","takemura"].forEach(k=>document.getElementById("sf-"+k).className="staff-btn"+(k===s?" active":""));
+  document.getElementById("listTitle").textContent=s==="all"?"企業一覧":STAFF[s].label+"の担当";
+  renderList();
+}
+
+/* ── 企業リスト ── */
+function filterList(v){filterText=v.toLowerCase();renderList();}
+function renderList(){
+  const el=document.getElementById("companyList");
+  const list=companies.filter(c=>{
+    if(activeJobCat!=="all"&&c.jobcat!==activeJobCat)return false;
+    if(activeStaff!=="all"&&c.staff!==activeStaff)return false;
+    if(filterText&&!c.name.toLowerCase().includes(filterText))return false;
+    return true;
+  });
+  el.innerHTML=list.map(c=>{
+    const undone=c.checklist.filter(x=>!x.done&&x.priority==="high").length;
+    const st=STAFF[c.staff];
+    return `<div class="company-card ${selectedId===c.id?'selected':''}" onclick="selectCompany(${c.id})">
+      <div class="company-top">
+        <div class="company-icon">${c.name.replace(/株式会社|合同会社/g,'').trim().slice(0,2)}</div>
+        <div class="company-name">${c.name}</div>
+        ${sb(c.status)}
+      </div>
+      <div class="company-bottom">
+        <div class="meta-chip"><i class="ti ti-message" style="font-size:11px;"></i>${c.negotiations.length}件</div>
+        ${st?`<div class="meta-chip"><div style="width:14px;height:14px;border-radius:50%;background:${st.color};color:${st.tc};font-size:8px;font-weight:700;display:flex;align-items:center;justify-content:center;">${st.short}</div>${st.label}</div>`:''}
+        ${undone>0?`<div class="meta-chip" style="color:#A32D2D;"><i class="ti ti-alert-circle" style="font-size:11px;"></i>要確認</div>`:''}
+      </div>
+    </div>`;
+  }).join('')||'<div style="text-align:center;padding:30px;color:#ccc;font-size:12px;">該当企業なし</div>';
+}
+
+/* ── 詳細パネル ── */
+function selectCompany(id){
+  selectedId=id;renderList();
+  const c=companies.find(x=>x.id===id);
+  const undone=c.checklist.filter(x=>!x.done).length;
+  const st=STAFF[c.staff]||{label:"未設定",color:"#eee",tc:"#999"};
+  document.getElementById("detailPanel").innerHTML=`
+    <div class="detail-header">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div class="company-icon" style="width:40px;height:40px;font-size:14px;border-radius:10px;">${c.name.replace(/株式会社|合同会社/g,'').trim().slice(0,2)}</div>
+        <div style="flex:1;">
+          <div class="detail-name">${c.name}</div>
+          <div class="detail-sub">${c.industry||''}${c.size?' · '+c.size:''} · 集客: ${c.channel||'未設定'}</div>
+        </div>
+        ${sb(c.status)}
+      </div>
+      <div class="detail-actions">
+        <div style="display:flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;font-size:11px;background:${st.color};color:${st.tc};">
+          <i class="ti ti-user" style="font-size:12px;"></i>担当: ${st.label}
+        </div>
+        <button class="btn sm" onclick="openEditModal(${id})"><i class="ti ti-edit"></i>編集</button>
+        <button class="btn sm danger" onclick="deleteCompany(${id})"><i class="ti ti-trash"></i>削除</button>
+      </div>
+    </div>
+    <div class="tab-bar">
+      <div class="tab active" id="tab-neg" onclick="switchTab('neg',${id})">折衝履歴</div>
+      <div class="tab" id="tab-overview" onclick="switchTab('overview',${id})">基本情報</div>
+      <div class="tab" id="tab-positions" onclick="switchTab('positions',${id})">ポジション</div>
+      <div class="tab" id="tab-docs" onclick="switchTab('docs',${id})">契約・書類</div>
+      <div class="tab" id="tab-check" onclick="switchTab('check',${id})">確認事項${undone>0?' ('+undone+')':''}</div>
+    </div>
+    <div class="detail-body">
+      <div id="tc-neg" class="detail-content">${renderNeg(c)}</div>
+      <div id="tc-overview" class="detail-content" style="display:none">${renderOverview(c)}</div>
+      <div id="tc-positions" class="detail-content" style="display:none">${renderPositions(c)}</div>
+      <div id="tc-docs" class="detail-content" style="display:none">${renderDocs(c)}</div>
+      <div id="tc-check" class="detail-content" style="display:none">${renderCheck(c)}</div>
+    </div>`;
+}
+
+function switchTab(tab,id){
+  ["neg","overview","positions","docs","check"].forEach(t=>{
+    const el=document.getElementById("tab-"+t),ct=document.getElementById("tc-"+t);
+    if(el)el.className="tab"+(t===tab?" active":"");
+    if(ct)ct.style.display=t===tab?"block":"none";
+  });
+}
+
+/* ── 折衝履歴タブ ── */
+function renderNeg(c){
+  const types=["電話","メール確認","訪問","オンライン商談","内定承諾","書類選考","その他"];
+  return `
+    <div class="add-form-box" style="margin-bottom:20px;">
+      <div class="add-form-title">折衝内容を記録</div>
+      <div class="form-row">
+        <div class="fg"><label class="field-label">日付</label><input class="form-input" type="date" id="neg-date-${c.id}" value="${new Date().toISOString().slice(0,10)}"></div>
+        <div class="fg"><label class="field-label">種別</label><select class="form-input" id="neg-type-${c.id}">${types.map(t=>`<option>${t}</option>`).join('')}</select></div>
+      </div>
+      <div class="fg" style="margin-top:6px;"><label class="field-label">折衝内容</label><textarea class="memo-area" id="neg-body-${c.id}" placeholder="話した内容・確認事項・結果など..." style="min-height:80px;"></textarea></div>
+      <div class="fg" style="margin-top:6px;"><label class="field-label">次回アクション</label><input class="form-input" type="text" id="neg-next-${c.id}" placeholder="例: 来週までに採用要件を書面で受領"></div>
+      <div style="display:flex;justify-content:flex-end;margin-top:10px;">
+        <button class="btn primary sm" onclick="addNeg(${c.id})"><i class="ti ti-device-floppy"></i>記録を保存</button>
+      </div>
+    </div>
+
+    <div class="trigger-box" style="margin-bottom:20px;">
+      <div class="trigger-title"><i class="ti ti-brand-gmail" style="color:#EA4335;font-size:14px;"></i>メールトリガーキー</div>
+      <div style="font-size:11px;color:#aaa;margin-bottom:8px;">入力したキーワードでGmailを検索するリンクを生成します</div>
+      <div id="trigger-list-${c.id}" style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px;">
+        ${(c.negotiations.flatMap(n=>n.triggers||[])).map((t,i)=>renderTriggerTag(c.id,t,i)).join('')}
+      </div>
+      <div style="display:flex;gap:6px;margin-bottom:6px;">
+        <input class="form-input" type="text" id="trg-kw-${c.id}" placeholder="トリガーキーワード（例: 堀 丞）" style="flex:2;">
+        <input class="form-input" type="text" id="trg-memo-${c.id}" placeholder="メモ" style="flex:1;">
+        <button class="btn primary sm" onclick="addTrigger(${c.id})"><i class="ti ti-plus"></i></button>
+      </div>
+    </div>
+
+    ${c.negotiations.length===0?'<div style="text-align:center;padding:30px;color:#ccc;font-size:13px;">折衝履歴がありません</div>':''}
+    ${c.negotiations.slice().reverse().map(n=>`
+      <div class="neg-item">
+        <div class="neg-header">
+          <span class="neg-date">${n.date}</span>
+          <span class="neg-type">${n.type}</span>
+          <button class="icon-btn" style="margin-left:auto;" onclick="removeNeg(${c.id},${n.id})"><i class="ti ti-trash"></i></button>
+        </div>
+        <div class="neg-body">${esc(n.content)}</div>
+        ${n.nextAction?`<div class="neg-next"><i class="ti ti-arrow-right"></i>次回：${esc(n.nextAction)}</div>`:''}
+      </div>`).join('')}`;
+}
+
+function renderTriggerTag(cid,t,i){
+  const q=encodeURIComponent(t.kw);
+  const gmailUrl=`https://mail.google.com/mail/u/0/#search/${q}`;
+  return `<span class="trigger-tag">
+    <i class="ti ti-key" style="font-size:12px;color:#aaa;"></i>
+    ${esc(t.kw)}
+    ${t.memo?`<span style="color:#aaa;font-size:10px;">（${esc(t.memo)}）</span>`:''}
+    <a href="${gmailUrl}" target="_blank" title="Gmailで検索"><i class="ti ti-brand-gmail" style="font-size:12px;color:#EA4335;"></i></a>
+    <span class="rm" onclick="removeTrigger(${cid},${i})"><i class="ti ti-x"></i></span>
+  </span>`;
+}
+
+function addTrigger(cid){
+  const c=companies.find(x=>x.id===cid);
+  const kw=document.getElementById(`trg-kw-${cid}`).value.trim();
+  if(!kw)return;
+  const memo=document.getElementById(`trg-memo-${cid}`).value.trim();
+  // 最新の折衝に追加（なければ独立保管）
+  if(!c._triggers)c._triggers=[];
+  c._triggers.push({kw,memo});
+  document.getElementById(`trg-kw-${cid}`).value="";
+  document.getElementById(`trg-memo-${cid}`).value="";
+  save();
+  const allTriggers=getAllTriggers(c);
+  const el=document.getElementById(`trigger-list-${cid}`);
+  if(el)el.innerHTML=allTriggers.map((t,i)=>renderTriggerTag(cid,t,i)).join('');
+}
+
+function getAllTriggers(c){
+  const fromNegs=c.negotiations.flatMap(n=>n.triggers||[]);
+  const standalone=c._triggers||[];
+  return [...fromNegs,...standalone];
+}
+
+function removeTrigger(cid,idx){
+  const c=companies.find(x=>x.id===cid);
+  const all=getAllTriggers(c);
+  // standalone側から削除
+  const fromNegs=c.negotiations.flatMap(n=>n.triggers||[]).length;
+  if(idx>=fromNegs){
+    if(!c._triggers)c._triggers=[];
+    c._triggers.splice(idx-fromNegs,1);
+    save();
+    const el=document.getElementById(`trigger-list-${cid}`);
+    if(el)el.innerHTML=getAllTriggers(c).map((t,i)=>renderTriggerTag(cid,t,i)).join('');
+  }
+}
+
+/* ── 基本情報タブ（担当者・名刺含む） ── */
+function renderOverview(c){
+  const st=STAFF[c.staff]||{label:"未設定"};
+  return `
+    ${c.nextAction?`<div style="background:#EEEDFE;border-radius:8px;padding:10px 14px;display:flex;gap:8px;margin-bottom:16px;"><i class="ti ti-calendar-event" style="color:#534AB7;font-size:15px;flex-shrink:0;margin-top:1px;"></i><div style="font-size:12px;color:#3C3489;line-height:1.6;"><strong>次回アクション：</strong>${c.nextAction}</div></div>`:''}
+    <div class="form-row">
+      <div class="fg"><label class="field-label">成約状況</label>
+        <select class="form-input" onchange="updateField(${c.id},'status',this.value)" style="width:auto;">
+          ${["active","approval","contracted","review","shrink"].map(s=>`<option value="${s}"${c.status===s?' selected':''}>${SL[s]}</option>`).join('')}
+        </select>
+      </div>
+      <div class="fg"><label class="field-label">自社担当</label>
+        <select class="form-input" onchange="updateField(${c.id},'staff',this.value)" style="width:auto;">
+          <option value="inadama"${c.staff==='inadama'?' selected':''}>稲玉千尋</option>
+          <option value="takemura"${c.staff==='takemura'?' selected':''}>竹村厚美</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="fg"><label class="field-label">次回アクション</label><input class="form-input" type="text" value="${esc(c.nextAction||'')}" onblur="updateField(${c.id},'nextAction',this.value)"></div>
+      <div class="fg"><label class="field-label">集客経路</label><input class="form-input" type="text" value="${esc(c.channel||'')}" onblur="updateField(${c.id},'channel',this.value)" placeholder="例: 紹介・展示会"></div>
+    </div>
+    <div class="divider"></div>
+    <div class="section-title"><i class="ti ti-users"></i>企業側担当者</div>
+    ${c.contacts.map((ct,i)=>`
+      <div class="contact-card">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;">
+          <div><div style="font-size:13px;font-weight:500;">${ct.name}</div>
+          <div style="font-size:11px;color:#999;margin-top:2px;">${[ct.dept,ct.role].filter(Boolean).join(' · ')}</div></div>
+          <button class="icon-btn" onclick="removeContact(${c.id},${i})"><i class="ti ti-trash"></i></button>
+        </div>
+        ${ct.phone?`<div style="font-size:12px;color:#555;margin-top:5px;display:flex;gap:6px;"><i class="ti ti-phone" style="font-size:12px;color:#aaa;"></i>${ct.phone}</div>`:''}
+        ${ct.email?`<div style="font-size:12px;color:#555;margin-top:3px;display:flex;gap:6px;"><i class="ti ti-mail" style="font-size:12px;color:#aaa;"></i>${ct.email}</div>`:''}
+      </div>`).join('')}
+    <div class="add-form-box">
+      <div class="add-form-title">担当者を追加</div>
+      <div class="form-row"><input class="form-input" type="text" id="ac-name-${c.id}" placeholder="担当者名"><input class="form-input" type="text" id="ac-dept-${c.id}" placeholder="部署"></div>
+      <div class="form-row" style="margin-top:6px;"><input class="form-input" type="text" id="ac-role-${c.id}" placeholder="役職"><input class="form-input" type="text" id="ac-phone-${c.id}" placeholder="電話番号"></div>
+      <input class="form-input" type="text" id="ac-email-${c.id}" placeholder="メールアドレス" style="margin-top:6px;">
+      <button class="btn primary sm" style="margin-top:10px;" onclick="addContact(${c.id})"><i class="ti ti-plus"></i>追加</button>
+    </div>
+    <div class="divider"></div>
+    <div class="section-title"><i class="ti ti-id"></i>名刺</div>
+    ${(c.bizCards||[]).map((bc,i)=>`
+      <div class="biz-card-item">
+        <i class="ti ti-id" style="color:#534AB7;font-size:16px;flex-shrink:0;"></i>
+        <div style="flex:1;font-size:12px;">${bc.name}</div>
+        <button class="icon-btn" onclick="viewBizCard(${c.id},${i})"><i class="ti ti-eye"></i></button>
+        <button class="icon-btn" onclick="removeBizCard(${c.id},${i})"><i class="ti ti-trash"></i></button>
+      </div>`).join('')}
+    <div class="biz-card-area" onclick="document.getElementById('biz-upload-${c.id}').click()">
+      <i class="ti ti-upload" style="font-size:20px;display:block;margin-bottom:4px;"></i>
+      名刺画像をアップロード（複数可）
+    </div>
+    <input type="file" id="biz-upload-${c.id}" accept="image/*" multiple style="display:none;" onchange="uploadBizCard(${c.id},this)">
+    <div class="divider"></div>
+    <div class="fg"><label class="field-label">備考・メモ</label><textarea class="memo-area" onblur="updateField(${c.id},'memo',this.value)">${esc(c.memo||'')}</textarea></div>`;
+}
+
+/* ── ポジションタブ ── */
+function renderPositions(c){
+  return `
+    ${c.positions.map((p,i)=>`
+      <div class="pos-block">
+        <div class="pos-name-row">
+          <div style="font-size:14px;font-weight:600;flex:1;">${p.name}</div>
+          <span class="pos-badge ${(()=>{const tot=MONTHS.reduce((a,m)=>a+(parseInt(p.monthly?.achieved?.[m])||0),0);const plan=MONTHS.reduce((a,m)=>a+(parseInt(p.monthly?.plan?.[m])||0),0);return tot>=plan&&plan>0?'pos-filled':'pos-open';})()}">${(()=>{const tot=MONTHS.reduce((a,m)=>a+(parseInt(p.monthly?.achieved?.[m])||0),0);const plan=MONTHS.reduce((a,m)=>a+(parseInt(p.monthly?.plan?.[m])||0),0);return tot>=plan&&plan>0?'充足':'募集中';})()}</span>
+          <button class="icon-btn" onclick="removePosition(${c.id},${i})"><i class="ti ti-trash"></i></button>
+        </div>
+        <div style="font-size:12px;color:#aaa;margin-bottom:10px;">採用予算: ${p.budget?p.budget+'万円':'未設定'}</div>
+        <div style="overflow-x:auto;">
+          <table class="month-table">
+            <thead><tr><th>月</th>${MONTHS.map(m=>`<th>${m}</th>`).join('')}<th>計</th></tr></thead>
+            <tbody>
+              <tr>
+                <td style="font-size:10px;color:#999;white-space:nowrap;">計画</td>
+                ${MONTHS.map(m=>`<td><input type="number" min="0" value="${p.monthly?.plan?.[m]||''}" onchange="updateMonthly(${c.id},${i},'plan','${m}',this.value)" placeholder="-"></td>`).join('')}
+                <td style="font-weight:600;">${MONTHS.reduce((a,m)=>a+(parseInt(p.monthly?.plan?.[m])||0),0)}</td>
+              </tr>
+              <tr>
+                <td style="font-size:10px;color:#534AB7;white-space:nowrap;">達成</td>
+                ${MONTHS.map(m=>`<td><input type="number" min="0" value="${p.monthly?.achieved?.[m]||''}" onchange="updateMonthly(${c.id},${i},'achieved','${m}',this.value)" style="border-color:#534AB7;" placeholder="-"></td>`).join('')}
+                <td style="font-weight:600;color:#534AB7;">${MONTHS.reduce((a,m)=>a+(parseInt(p.monthly?.achieved?.[m])||0),0)}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="divider" style="margin:12px 0;"></div>
+        <div class="section-title" style="margin-bottom:6px;"><i class="ti ti-link"></i>Notionリンク（このポジション用）</div>
+        ${(p.notionLinks||[]).map((n,ni)=>`
+          <div class="notion-row" style="margin-bottom:5px;">
+            <i class="ti ti-brand-notion" style="font-size:15px;color:#555;flex-shrink:0;"></i>
+            <div style="flex:1;min-width:0;"><div style="font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${n.title}</div><div style="font-size:10px;color:#aaa;font-family:monospace;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${n.url}</div></div>
+            <button class="icon-btn" onclick="window.open('${n.url}','_blank')"><i class="ti ti-external-link"></i></button>
+            <button class="icon-btn" onclick="removePosNotion(${c.id},${i},${ni})"><i class="ti ti-trash"></i></button>
+          </div>`).join('')}
+        <div style="display:flex;gap:6px;margin-top:4px;"><input class="form-input" type="text" id="pn-title-${c.id}-${i}" placeholder="ページ名" style="flex:1;"><input class="form-input" type="text" id="pn-url-${c.id}-${i}" placeholder="https://notion.so/..." style="flex:2;"><button class="btn primary sm" onclick="addPosNotion(${c.id},${i})"><i class="ti ti-plus"></i></button></div>
+      </div>`).join('')}
+    <div class="add-form-box">
+      <div class="add-form-title">ポジションを追加</div>
+      <input class="form-input" type="text" id="ap-name-${c.id}" placeholder="ポジション名">
+      <input class="form-input" type="number" id="ap-budget-${c.id}" placeholder="採用予算（万円）" min="0" style="margin-top:6px;">
+      <button class="btn primary sm" style="margin-top:10px;" onclick="addPosition(${c.id})"><i class="ti ti-plus"></i>追加</button>
+    </div>`;
+}
+
+/* ── 契約・書類タブ ── */
+function renderDocs(c){
+  const dtI={contract:"ti-file-certificate",memo:"ti-file-description",other:"ti-file"};
+  const dtL={contract:"契約書",memo:"覚書",other:"その他"};
+  return `
+    <div class="section-title"><i class="ti ti-brand-google-drive" style="color:#0F9D58;"></i>Google Drive</div>
+    ${c.docs.length===0?'<div style="font-size:12px;color:#ccc;padding:4px 0 10px;">ファイル未登録</div>':''}
+    ${c.docs.map((d,i)=>`
+      <div class="doc-row">
+        <i class="ti ${dtI[d.type]||'ti-file'}" style="color:${d.type==='contract'?'#534AB7':'#BA7517'};font-size:16px;flex-shrink:0;"></i>
+        <div style="flex:1;min-width:0;"><div style="font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${d.name}</div><div style="font-size:10px;color:#aaa;margin-top:2px;">${dtL[d.type]||'書類'} · ${d.date}</div></div>
+        <button class="icon-btn" onclick="window.open('${d.url}','_blank')"><i class="ti ti-external-link"></i></button>
+        <button class="icon-btn" onclick="removeDoc(${c.id},${i})"><i class="ti ti-trash"></i></button>
+      </div>`).join('')}
+    <div style="display:flex;gap:6px;margin-top:4px;"><input class="form-input" type="text" id="doc-name-${c.id}" placeholder="ファイル名"><select id="doc-type-${c.id}" style="padding:6px 8px;border:1px solid #ddd;border-radius:8px;font-size:12px;background:#fff;"><option value="contract">契約書</option><option value="memo">覚書</option><option value="other">その他</option></select></div>
+    <div style="display:flex;gap:6px;margin-top:6px;"><input class="form-input" type="text" id="doc-url-${c.id}" placeholder="Google Drive URL" style="flex:1;"><button class="btn primary sm" onclick="addDoc(${c.id})"><i class="ti ti-plus"></i>追加</button></div>
+    <div class="divider"></div>
+    <div class="section-title"><i class="ti ti-brand-notion"></i>Notionリンク（クライアント情報）</div>
+    ${c.notionLinks.length===0?'<div style="font-size:12px;color:#ccc;padding:4px 0 10px;">リンク未登録</div>':''}
+    ${c.notionLinks.map((n,i)=>`
+      <div class="notion-row">
+        <i class="ti ti-brand-notion" style="font-size:16px;color:#555;flex-shrink:0;"></i>
+        <div style="flex:1;min-width:0;"><div style="font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${n.title}</div><div style="font-size:10px;color:#aaa;font-family:monospace;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${n.url}</div></div>
+        <button class="icon-btn" onclick="window.open('${n.url}','_blank')"><i class="ti ti-external-link"></i></button>
+        <button class="icon-btn" onclick="removeNotion(${c.id},${i})"><i class="ti ti-trash"></i></button>
+      </div>`).join('')}
+    <input class="form-input" type="text" id="notion-title-${c.id}" placeholder="ページ名" style="margin-top:4px;">
+    <div style="display:flex;gap:6px;margin-top:6px;"><input class="form-input" type="text" id="notion-url-${c.id}" placeholder="https://notion.so/..." style="flex:1;"><button class="btn primary sm" onclick="addNotion(${c.id})"><i class="ti ti-plus"></i>追加</button></div>
+    <div class="divider"></div>
+    <div class="section-title"><i class="ti ti-receipt-refund"></i>返金規定</div>
+    <div class="refund-box">
+      <div class="refund-row"><span class="refund-label">返金率</span><input type="text" value="${c.refund.rate}" onchange="updateRefund(${c.id},'rate',this.value)" style="flex:1;border:none;background:transparent;font-size:13px;outline:none;"></div>
+      <div class="refund-row"><span class="refund-label">対象期間</span><input type="text" value="${c.refund.period}" onchange="updateRefund(${c.id},'period',this.value)" style="flex:1;border:none;background:transparent;font-size:13px;outline:none;"></div>
+      <div class="refund-row"><span class="refund-label">条件</span><input type="text" value="${c.refund.condition}" onchange="updateRefund(${c.id},'condition',this.value)" style="flex:1;border:none;background:transparent;font-size:13px;outline:none;"></div>
+      <div class="refund-row"><span class="refund-label">補足</span><input type="text" value="${c.refund.memo}" onchange="updateRefund(${c.id},'memo',this.value)" style="flex:1;border:none;background:transparent;font-size:13px;outline:none;"></div>
+    </div>`;
+}
+
+/* ── 確認事項タブ ── */
+function renderCheck(c){
+  const done=c.checklist.filter(x=>x.done).length;
+  const pct=c.checklist.length?Math.round(done/c.checklist.length*100):0;
+  return `
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;">
+      <div class="prog-bar"><div class="prog-fill" style="width:${pct}%;"></div></div>
+      <span style="font-size:11px;color:#aaa;">${done}/${c.checklist.length}</span>
+    </div>
+    <div id="cl-${c.id}">${c.checklist.map(i=>ciHTML(c.id,i)).join('')}</div>
+    <div style="display:flex;gap:6px;margin-top:14px;">
+      <select id="cl-pri-${c.id}" style="padding:6px 8px;border:1px solid #ddd;border-radius:8px;font-size:12px;background:#fff;width:60px;">
+        <option value="high">高</option><option value="med" selected>中</option><option value="low">低</option>
+      </select>
+      <input class="form-input" type="text" id="cl-inp-${c.id}" placeholder="確認事項を追加..." onkeydown="if(event.key==='Enter')addCheck(${c.id})">
+      <button class="btn primary sm" onclick="addCheck(${c.id})"><i class="ti ti-plus"></i></button>
+    </div>
+    <div class="divider"></div>
+    <label class="field-label">メモ</label>
+    <textarea class="memo-area" onblur="updateField(${c.id},'checkMemo',this.value)">${esc(c.checkMemo||'')}</textarea>`;
+}
+
+function ciHTML(cid,item){
+  const pc=item.priority==='high'?'p-high':item.priority==='med'?'p-med':'p-low';
+  const pl=item.priority==='high'?'優先高':item.priority==='med'?'優先中':'優先低';
+  return `<div class="check-item">
+    <div class="check-box ${item.done?'checked':''}" onclick="toggleCheck(${cid},${item.id})">${item.done?'<i class="ti ti-check"></i>':''}</div>
+    <div style="flex:1;"><div class="check-label ${item.done?'done':''}">${item.text}</div>${item.note?`<div style="font-size:11px;color:#aaa;margin-top:2px;">${item.note}</div>`:''}</div>
+    <span class="check-priority ${pc}">${pl}</span>
+  </div>`;
+}
+
+/* ── 各種更新関数 ── */
+function updateField(id,key,val){companies.find(x=>x.id===id)[key]=val;save();renderList();}
+function updateRefund(id,key,val){companies.find(x=>x.id===id).refund[key]=val;save();}
+function updateMonthly(cid,pi,type,month,val){
+  const c=companies.find(x=>x.id===cid);
+  if(!c.positions[pi].monthly)c.positions[pi].monthly={plan:{},achieved:{}};
+  c.positions[pi].monthly[type][month]=val;
+  save();
+}
+function addNeg(cid){
+  const c=companies.find(x=>x.id===cid);
+  const body=document.getElementById(`neg-body-${cid}`).value.trim();
+  if(!body){alert("折衝内容を入力してください");return;}
+  const newId=Math.max(...c.negotiations.map(x=>x.id),0)+1;
+  c.negotiations.push({id:newId,date:document.getElementById(`neg-date-${cid}`).value,type:document.getElementById(`neg-type-${cid}`).value,content:body,nextAction:document.getElementById(`neg-next-${cid}`).value,triggers:[]});
+  document.getElementById(`neg-body-${cid}`).value="";
+  document.getElementById(`neg-next-${cid}`).value="";
+  save();selectCompany(cid);switchTab('neg',cid);
+}
+function removeNeg(cid,id){companies.find(x=>x.id===cid).negotiations=companies.find(x=>x.id===cid).negotiations.filter(x=>x.id!==id);save();selectCompany(cid);switchTab('neg',cid);}
+function addContact(cid){const c=companies.find(x=>x.id===cid),n=document.getElementById(`ac-name-${cid}`).value.trim();if(!n)return;c.contacts.push({name:n,dept:document.getElementById(`ac-dept-${cid}`).value,role:document.getElementById(`ac-role-${cid}`).value,phone:document.getElementById(`ac-phone-${cid}`).value,email:document.getElementById(`ac-email-${cid}`).value});save();selectCompany(cid);switchTab('overview',cid);}
+function removeContact(cid,i){companies.find(x=>x.id===cid).contacts.splice(i,1);save();selectCompany(cid);switchTab('overview',cid);}
+function addPosition(cid){const c=companies.find(x=>x.id===cid),n=document.getElementById(`ap-name-${cid}`).value.trim();if(!n)return;const newId=Math.max(...c.positions.map(x=>x.id||0),0)+1;c.positions.push({id:newId,name:n,budget:parseInt(document.getElementById(`ap-budget-${cid}`).value)||0,notionLinks:[],monthly:{plan:{},achieved:{}}});save();selectCompany(cid);switchTab('positions',cid);}
+function removePosition(cid,i){companies.find(x=>x.id===cid).positions.splice(i,1);save();selectCompany(cid);switchTab('positions',cid);}
+function addPosNotion(cid,pi){const c=companies.find(x=>x.id===cid),t=document.getElementById(`pn-title-${cid}-${pi}`).value.trim(),u=document.getElementById(`pn-url-${cid}-${pi}`).value.trim();if(!t||!u)return;if(!c.positions[pi].notionLinks)c.positions[pi].notionLinks=[];c.positions[pi].notionLinks.push({title:t,url:u});save();selectCompany(cid);switchTab('positions',cid);}
+function removePosNotion(cid,pi,ni){const c=companies.find(x=>x.id===cid);c.positions[pi].notionLinks.splice(ni,1);save();selectCompany(cid);switchTab('positions',cid);}
+function addDoc(cid){const c=companies.find(x=>x.id===cid),n=document.getElementById(`doc-name-${cid}`).value.trim();if(!n)return;c.docs.push({name:n,type:document.getElementById(`doc-type-${cid}`).value,date:new Date().toISOString().slice(0,10),url:document.getElementById(`doc-url-${cid}`).value||"#"});save();selectCompany(cid);switchTab('docs',cid);}
+function removeDoc(cid,i){companies.find(x=>x.id===cid).docs.splice(i,1);save();selectCompany(cid);switchTab('docs',cid);}
+function addNotion(cid){const c=companies.find(x=>x.id===cid),t=document.getElementById(`notion-title-${cid}`).value.trim(),u=document.getElementById(`notion-url-${cid}`).value.trim();if(!t||!u)return;c.notionLinks.push({title:t,url:u});save();selectCompany(cid);switchTab('docs',cid);}
+function removeNotion(cid,i){companies.find(x=>x.id===cid).notionLinks.splice(i,1);save();selectCompany(cid);switchTab('docs',cid);}
+function toggleCheck(cid,itemId){const c=companies.find(x=>x.id===cid),item=c.checklist.find(x=>x.id===itemId);item.done=!item.done;save();const el=document.getElementById(`cl-${cid}`);if(el)el.innerHTML=c.checklist.map(i=>ciHTML(cid,i)).join('');renderList();}
+function addCheck(cid){const c=companies.find(x=>x.id===cid),inp=document.getElementById(`cl-inp-${cid}`),pri=document.getElementById(`cl-pri-${cid}`),v=inp.value.trim();if(!v)return;c.checklist.push({id:Math.max(...c.checklist.map(x=>x.id),0)+1,text:v,done:false,priority:pri.value,note:""});inp.value="";save();const el=document.getElementById(`cl-${cid}`);if(el)el.innerHTML=c.checklist.map(i=>ciHTML(cid,i)).join('');renderList();}
+function deleteCompany(id){if(!confirm("この企業を削除しますか？"))return;companies=companies.filter(x=>x.id!==id);save();selectedId=null;renderJobTabs();renderList();document.getElementById("detailPanel").innerHTML='<div class="empty-detail"><i class="ti ti-building" style="font-size:32px;"></i>企業を選択してください</div>';}
+
+/* ── 名刺 ── */
+function uploadBizCard(cid,input){
+  const c=companies.find(x=>x.id===cid);
+  if(!c.bizCards)c.bizCards=[];
+  Array.from(input.files).forEach(file=>{
+    const r=new FileReader();
+    r.onload=e=>{c.bizCards.push({name:file.name,data:e.target.result});save();selectCompany(cid);switchTab('overview',cid);};
+    r.readAsDataURL(file);
+  });
+}
+function viewBizCard(cid,i){const c=companies.find(x=>x.id===cid);const w=window.open();w.document.write(`<img src="${c.bizCards[i].data}" style="max-width:100%;">`);}
+function removeBizCard(cid,i){companies.find(x=>x.id===cid).bizCards.splice(i,1);save();selectCompany(cid);switchTab('overview',cid);}
+
+/* ── モーダル ── */
+function openAddModal(){
+  editingId=null;modalContacts=[];modalPositions=[];
+  document.getElementById("modalTitleText").textContent="企業を追加";
+  ["m-name","m-size","m-industry","m-nextaction","m-channel","m-rrate","m-rperiod","m-rcondition","m-rmemo","m-memo"].forEach(id=>{const el=document.getElementById(id);if(el)el.value="";});
+  document.getElementById("m-status").value="active";
+  document.getElementById("m-staff").value="inadama";
+  document.getElementById("m-jobcat").value="all";
+  renderMC();renderMP();
+  document.getElementById("modalOverlay").className="modal-overlay open";
+}
+function openEditModal(id){
+  const c=companies.find(x=>x.id===id);editingId=id;
+  modalContacts=JSON.parse(JSON.stringify(c.contacts));
+  modalPositions=JSON.parse(JSON.stringify(c.positions));
+  document.getElementById("modalTitleText").textContent="企業を編集";
+  document.getElementById("m-name").value=c.name;
+  document.getElementById("m-size").value=c.size||"";
+  document.getElementById("m-industry").value=c.industry||"";
+  document.getElementById("m-jobcat").value=c.jobcat||"all";
+  document.getElementById("m-status").value=c.status||"active";
+  document.getElementById("m-staff").value=c.staff||"inadama";
+  document.getElementById("m-nextaction").value=c.nextAction||"";
+  document.getElementById("m-channel").value=c.channel||"";
+  document.getElementById("m-rrate").value=c.refund?.rate||"";
+  document.getElementById("m-rperiod").value=c.refund?.period||"";
+  document.getElementById("m-rcondition").value=c.refund?.condition||"";
+  document.getElementById("m-rmemo").value=c.refund?.memo||"";
+  document.getElementById("m-memo").value=c.memo||"";
+  renderMC();renderMP();
+  document.getElementById("modalOverlay").className="modal-overlay open";
+}
+function closeModal(){document.getElementById("modalOverlay").className="modal-overlay";}
+function addModalContact(){const n=document.getElementById("mc-name").value.trim();if(!n)return;modalContacts.push({name:n,dept:document.getElementById("mc-dept").value,role:document.getElementById("mc-role").value,phone:document.getElementById("mc-phone").value,email:document.getElementById("mc-email").value});["mc-name","mc-dept","mc-role","mc-phone","mc-email"].forEach(id=>document.getElementById(id).value="");renderMC();}
+function renderMC(){document.getElementById("m-contacts-list").innerHTML=modalContacts.map((ct,i)=>`<div class="entry-row"><div style="flex:1;"><strong>${ct.name}</strong>${ct.dept?' · '+ct.dept:''}${ct.role?' · '+ct.role:''}</div><button class="icon-btn" onclick="modalContacts.splice(${i},1);renderMC()"><i class="ti ti-x"></i></button></div>`).join('');}
+function addModalPosition(){const n=document.getElementById("mp-name").value.trim();if(!n)return;modalPositions.push({id:Date.now(),name:n,budget:parseInt(document.getElementById("mp-budget").value)||0,notionLinks:[],monthly:{plan:{},achieved:{}}});["mp-name","mp-budget"].forEach(id=>document.getElementById(id).value="");renderMP();}
+function renderMP(){document.getElementById("m-positions-list").innerHTML=modalPositions.map((p,i)=>`<div class="entry-row"><div style="flex:1;"><strong>${p.name}</strong>${p.budget?' · 予算'+p.budget+'万':''}</div><button class="icon-btn" onclick="modalPositions.splice(${i},1);renderMP()"><i class="ti ti-x"></i></button></div>`).join('');}
+function saveCompany(){
+  const name=document.getElementById("m-name").value.trim();if(!name){alert("企業名を入力してください");return;}
+  const data={name,size:document.getElementById("m-size").value,industry:document.getElementById("m-industry").value,jobcat:document.getElementById("m-jobcat").value,status:document.getElementById("m-status").value,staff:document.getElementById("m-staff").value,nextAction:document.getElementById("m-nextaction").value,channel:document.getElementById("m-channel").value,contacts:modalContacts,positions:modalPositions,refund:{rate:document.getElementById("m-rrate").value,period:document.getElementById("m-rperiod").value,condition:document.getElementById("m-rcondition").value,memo:document.getElementById("m-rmemo").value},memo:document.getElementById("m-memo").value};
+  if(editingId){Object.assign(companies.find(x=>x.id===editingId),data);}
+  else{const newId=Math.max(...companies.map(x=>x.id),0)+1;companies.push({id:newId,...data,negotiations:[],docs:[],notionLinks:[],keywords:[],bizCards:[],_triggers:[],checklist:[{id:1,text:"契約書の署名・捺印確認",done:false,priority:"high",note:""},{id:2,text:"返金規定の説明と同意取得",done:false,priority:"high",note:""},{id:3,text:"採用要件の最新版を書面で受領",done:false,priority:"high",note:""},{id:4,text:"請求先部署・担当者の確認",done:false,priority:"med",note:""},{id:5,text:"求人票の公開範囲の確認",done:false,priority:"low",note:""}],checkMemo:""});}
+  save();closeModal();renderJobTabs();renderList();if(editingId)selectCompany(editingId);
+}
+
+renderJobTabs();
+renderList();
+</script>
+</body>
+</html>
